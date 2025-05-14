@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+    <title>User and Auto Management</title>
+    
+</h:head>
+
+<h:body>
+    <div class="container">
+        <h1>User and Auto Management</h1>
+        
+        <!-- User Section -->
+        <div class="section">
+            <h2>User Management</h2>
+            
+            <!-- Add User Form -->
+            <h:form id="userForm">
+                <div class="form-group">
+                    <h:outputLabel for="userName" value="Name:" />
+                    <h:inputText id="userName" value="#{userBean.user.name}" styleClass="form-control" required="true" requiredMessage="Name is required" />
+                </div>
+                
+                <div class="form-group">
+                    <h:outputLabel for="userAge" value="Age:" />
+                    <h:inputText id="userAge" value="#{userBean.user.age}" styleClass="form-control" required="true" requiredMessage="Age is required" />
+                </div>
+                
+                <h:commandButton value="Add User" action="#{userBean.saveUser()}" styleClass="btn" />
+            </h:form>
+            
+            <!-- Users Table -->
+            <h3>Users</h3>
+            <h:form id="usersTableForm">
+                <h:dataTable value="#{userBean.userList}" var="user" styleClass="table">
+                    <h:column>
+                        <f:facet name="header">ID</f:facet>
+                        #{user.id}
+                    </h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Name</f:facet>
+                        #{user.name}
+                    </h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Age</f:facet>
+                        #{user.age}
+                    </h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Automobiles</f:facet>
+                        <ui:repeat value="#{user.autos}" var="auto">
+                            #{auto.model} (#{auto.color})<br/>
+                        </ui:repeat>
+                    </h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Update</f:facet>
+                        <h:commandButton value="Update" action="#{userBean.selectUser(user)}" styleClass="btn btn-update">
+                            <f:ajax execute="@this" render="updateUserForm" />
+                        </h:commandButton>
+                    </h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Delete</f:facet>
+                        <h:commandButton value="Delete" action="#{userBean.deleteUser(user.id)}" styleClass="btn btn-delete" 
+                                         onclick="return confirm('Are you sure you want to delete this user? All autos will also be deleted.');">
+                            <f:ajax execute="@this" render="@form :autoForm :autoTableForm" />
+                        </h:commandButton>
+                    </h:column>
+                </h:dataTable>
+            </h:form>
+            
+            <!-- Update User Form -->
+            <h:form id="updateUserForm" rendered="#{userBean.selectedUser != null}">
+                <h3>Update User</h3>
+                <div class="form-group">
+                    <h:outputLabel for="updateName" value="Name:" />
+                    <h:inputText id="updateName" value="#{userBean.selectedUser.name}" styleClass="form-control" required="true" />
+                </div>
+                
+                <div class="form-group">
+                    <h:outputLabel for="updateAge" value="Age:" />
+                    <h:inputText id="updateAge" value="#{userBean.selectedUser.age}" styleClass="form-control" required="true" />
+                </div>
+                
+                <h:commandButton value="Update" action="#{userBean.updateSelectedUser()}" styleClass="btn">
+                    <f:ajax execute="@form" render="@form :usersTableForm" />
+                </h:commandButton>
+                
+                <h:commandButton value="Cancel" action="#{userBean.cancelUpdate()}" styleClass="btn" immediate="true">
+                    <f:ajax execute="@this" render="@form" />
+                </h:commandButton>
+            </h:form>
+        </div>
+        
+        <!-- Auto Section -->
+        <div class="section">
+            <h2>Auto Management</h2>
+            
+            <!-- Add Auto Form -->
+            <h:form id="autoForm">
+                <div class="form-group">
+                    <h:outputLabel for="autoModel" value="Model:" />
+                    <h:inputText id="autoModel" value="#{autoBean.auto.model}" styleClass="form-control" required="true" requiredMessage="Model is required" />
+                </div>
+                
+                <div class="form-group">
+                    <h:outputLabel for="autoColor" value="Color:" />
+                    <h:inputText id="autoColor" value="#{autoBean.auto.color}" styleClass="form-control" required="true" requiredMessage="Color is required" />
+                </div>
+                
+                <div class="form-group">
+                    <h:outputLabel for="autoUser" value="User:" />
+                    <h:selectOneMenu id="autoUser" value="#{autoBean.selectedUserId}" styleClass="form-control" required="true" requiredMessage="User is required">
+                        <f:selectItem itemLabel="Select User" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{autoBean.allUsers}" var="user" itemValue="#{user.id}" itemLabel="#{user.name}" />
+                    </h:selectOneMenu>
+                </div>
+                
+                <h:commandButton value="Add Auto" action="#{autoBean.saveAuto()}" styleClass="btn" />
+            </h:form>
+            
+            <!-- Autos Table -->
+            <h3>Autos</h3>
+            <h:form id="autoTableForm">
+                <h:dataTable value="#{autoBean.autoList}" var="auto" styleClass="table">
+                    <h:column>
+                        <f:facet name="header">ID</f:facet>
+                        #{auto.id}
+                    </h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Model</f:facet>
+                        #{auto.model}
+                    </h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Color</f:facet>
+                        #{auto.color}
+                    </h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Owner</f:facet>
+                        #{auto.user.name}
+                    </h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Update</f:facet>
+                        <h:commandButton value="Update" action="#{autoBean.selectAuto(auto)}" styleClass="btn btn-update">
+                            <f:ajax execute="@this" render="updateAutoForm" />
+                        </h:commandButton>
+                    </h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Delete</f:facet>
+                        <h:commandButton value="Delete" action="#{autoBean.deleteAuto(auto.id)}" styleClass="btn btn-delete" 
+                                         onclick="return confirm('Are you sure you want to delete this auto?');">
+                            <f:ajax execute="@this" render="@form :usersTableForm" />
+                        </h:commandButton>
+                    </h:column>
+                </h:dataTable>
+            </h:form>
+            
+            <!-- Update Auto Form -->
+            <h:form id="updateAutoForm" rendered="#{autoBean.selectedAuto != null}">
+                <h3>Update Auto</h3>
+                <div class="form-group">
+                    <h:outputLabel for="updateModel" value="Model:" />
+                    <h:inputText id="updateModel" value="#{autoBean.selectedAuto.model}" styleClass="form-control" required="true" />
+                </div>
+                
+                <div class="form-group">
+                    <h:outputLabel for="updateColor" value="Color:" />
+                    <h:inputText id="updateColor" value="#{autoBean.selectedAuto.color}" styleClass="form-control" required="true" />
+                </div>
+                
+                <div class="form-group">
+                    <h:outputLabel for="updateAutoUser" value="User:" />
+                    <h:selectOneMenu id="updateAutoUser" value="#{autoBean.selectedUserId}" styleClass="form-control" required="true">
+                        <f:selectItem itemLabel="Select User" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{autoBean.allUsers}" var="user" itemValue="#{user.id}" itemLabel="#{user.name}" />
+                    </h:selectOneMenu>
+                </div>
+                
+                <h:commandButton value="Update" action="#{autoBean.updateSelectedAuto()}" styleClass="btn">
+                    <f:ajax execute="@form" render="@form :autoTableForm" />
+                </h:commandButton>
+                
+                <h:commandButton value="Cancel" action="#{autoBean.cancelUpdate()}" styleClass="btn" immediate="true">
+                    <f:ajax execute="@this" render="@form" />
+                </h:commandButton>
+            </h:form>
+        </div>
+    </div>
+</h:body>
+</html> 
